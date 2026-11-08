@@ -90,6 +90,9 @@ abstract class SyncFfmpeg : DefaultTask() {
 
     @get:Input abstract val ffmpegBuildRoot: Property<String>
 
+    /** When true, a missing pack is skipped with a warning (debug / CI builds without ffmpeg-build). Production stays strict. */
+    @get:Input abstract val allowMissing: Property<Boolean>
+
     @get:InputFiles
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val packFiles: ConfigurableFileCollection
@@ -102,6 +105,10 @@ abstract class SyncFfmpeg : DefaultTask() {
         val root = File(ffmpegBuildRoot.get())
         for ((subdir, slug) in packs.get()) {
             val pack = File(root, "out/$slug/pack")
+            if (!packLooksPresent(pack) && allowMissing.getOrElse(false)) {
+                logger.warn("ffmpeg: no pack for $slug at $pack - skipped (build it: ${FfmpegBuild.buildCommand(slug)}); ffmpeg features will be unavailable for this ABI")
+                continue
+            }
             check(packLooksPresent(pack)) {
                 "no ffmpeg pack for $slug at $pack — build it in ffmpeg-build: ${FfmpegBuild.buildCommand(slug)}"
             }

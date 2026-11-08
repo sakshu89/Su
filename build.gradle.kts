@@ -63,6 +63,8 @@ fun Project.registerFfmpegSync(name: String, packs: Map<String, String>, dir: Fi
         description = "Stage $what from ../ffmpeg-build/out."
         this.packs.set(packs)
         ffmpegBuildRoot.set(FfmpegBuild.root(project).absolutePath)
+        // Release (-Pproduction=true) requires every pack; debug builds tolerate absent ones.
+        allowMissing.set(project.findProperty("production")?.toString() != "true")
         packFiles.from(packs.values.map { FfmpegBuild.pack(project, it) })
         outputDir.set(dir)
     }

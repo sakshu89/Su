@@ -497,12 +497,13 @@ fun NowPlayingScreen(
                 },
             ) {
                 if (lyricsOpen) {
+                    val lyricsUriHandler = LocalUriHandler.current
                     SkeletonLyricsScreen(
                         player = coordinator.player,
                         onClose = { lyricsOpen = false },
                         onSearch = {
                             val item = coordinator.player.queue.value.currentItem
-                            if (item != null) LocalUriHandler.current.openUri(lyricsSearchUrl(item))
+                            if (item != null) lyricsUriHandler.openUri(lyricsSearchUrl(item))
                         },
                     )
                 } else if (platformUsesTouch) shell() else FocusCatcher { shell() }
@@ -662,6 +663,7 @@ private fun SkeletonLyricsScreen(
     val lines by player.captionLines.collectAsState()
     val current = queue.currentItem
     val uriHandler = LocalUriHandler.current
+    val accent = DesignColors.Accent
 
     Box(
         Modifier.fillMaxSize().background(Color.Black),
@@ -670,7 +672,7 @@ private fun SkeletonLyricsScreen(
         Box(
             Modifier.fillMaxSize().drawBehind {
                 drawCircle(
-                    color = DesignColors.Accent.copy(alpha = 0.10f),
+                    color = accent.copy(alpha = 0.10f),
                     radius = size.minDimension * 0.72f,
                     center = Offset(size.width / 2f, size.height * 0.18f),
                 )
